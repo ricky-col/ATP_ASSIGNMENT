@@ -1,0 +1,32 @@
+###READ products
+GET http://localhost:4000/product-api/products
+
+###
+POST http://127.0.0.1:4000/product-api/products
+Content-Type: application/json
+
+{
+    "productName":"airpods",
+    "price":25000,
+    "brand":"Apple"
+}
+
+###create a user req
+POST http://127.0.0.1:4000/user-api/users
+Content-Type: application/json
+
+{
+    "name":"vivek",
+    "email":"vivek@gmail.com",
+    "password":"riya",
+    "cart":[]
+}
+
+###req to add product to cart
+PUT http://127.0.0.1:4000/user-api/cart/user-id/698194a96a9805f89087a717/product-id/698879c6c05a6e0da9e057d2
+
+###
+PUT http://127.0.0.1:4000/user-api/cart/user-id/698194a96a9805f89087a717/product-id/698879c6c05a6e0da9e057d2
+
+###reading the user along with cart details
+GET http://127.0.0.1:4000/user-api/users/698073984ff58a1e3b361b9f

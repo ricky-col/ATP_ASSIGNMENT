@@ -1,0 +1,145 @@
+### user register
+POST http://localhost:4000/user-api/users
+Content-Type: application/json
+
+{
+    "firstName":"revanth",
+    "lastName":"yadav",
+    "email":"anurag.user@example.com",
+    "password":"ricky@123",
+    "profileImageUrl":"https://example.com/profile.jpg"
+}
+
+### create author
+POST http://localhost:4000/author-api/users
+Content-Type: application/json
+
+{
+    "firstName":"vivek",
+    "lastName":"patel",
+    "email":"vivek@gmail.com",
+    "password":"vivek@123",
+    "profileImageUrl":"https://exameeeple.com/profile.jpg"
+}
+
+### authenticate user
+POST http://localhost:4000/common-api/login
+Content-Type: application/json
+
+{
+    "email":"anurag.user@example.com",
+    "password":"ricky@9848"
+
+}
+
+
+### authenticate author
+POST http://localhost:4000/author-api/authenticate
+Content-Type: application/json
+
+{
+    "email":"vivek@gmail.com",
+    "password":"vivek@123",
+    "role":"AUTHOR"
+}
+
+
+
+
+### create article
+POST http://localhost:4000/author-api/articles
+Content-Type: application/json
+
+{
+    "author" : "698966083c94398791f66284",
+    "title": "programming in python",
+    "category":"programmin",
+    "content":"programming in python content"
+}
+
+
+
+
+###read article by author
+GET http://localhost:4000/author-api/articles/698966083c94398791f66284
+
+
+
+### update article
+PUT http://localhost:4000/author-api/articles
+Content-Type: application/json
+
+{
+     "author" : "698966083c94398791f66284",
+     "articleId":"6989984b5ad0a9cc5f993b8b",
+    "title": "python programming",
+    "category":"programming",
+    "content":"python programming content"
+}
+###add comment to articles
+PUT http://localhost:4000/user-api/users/698966083c94398791f66284/article/698975cc989ff0ef4d95b208
+Content-Type: application/json
+
+{
+    "comment":"nice article"
+}
+
+###delete article
+PUT http://localhost:4000/author-api/article
+Content-Type: application/json
+
+{
+    "author" : "698966083c94398791f66284",
+    "articleId":"6989984b5ad0a9cc5f993b8b",
+    "isArticleActive":"false"
+}
+
+### logout
+GET http://localhost:4000/common-api/logout
+
+### read all articles
+GET http://localhost:4000/user-api/articles/698966083c94398791f66284
+
+###
+PUT http://localhost:4000/user-api/articles
+Content-Type: application/json
+
+{
+    "author": "698966083c94398791f66284",
+    "articleId":"6989984b5ad0a9cc5f993b8b",
+    "comments"
+    
+
+}
+
+
+
+
+###
+GET http://localhost:4000/test
+
+
+###block user
+PUT http://localhost:4000/admin-api/block/698966083c94398791f66284
+Content-Type: application/json
+
+{
+    "author":"698966083c94398791f66284"
+}
+
+###
+PUT http://localhost:4000/admin-api/unblock/698966083c94398791f66284
+Content-Type: application/json
+
+{
+    "author":"698966083c94398791f66284"
+}
+
+###
+PUT http://localhost:4000/common-api/change-password/6989656f73d2b14511bdc3c8
+Content-Type: application/json
+
+{
+    "password":"ricky@123",
+    "newpassword":"ricky@9848"
+}

@@ -1,0 +1,13 @@
+side effects:
+
+a component can be rendered initially before displyaing content.
+if the component is about to make an API req, it should wait for initial rendering to be finished.
+if both initail rendering and api request happen together it leads to unexpected bugs in the application.
+
+useEffect hook is used to handle side effects in a component.
+no dependency array - runs after every render
+empty array[] - runs after initail render only
+with dependencies -- runs after dependencies change
+with optional cleanup function -- runs before component unmounts
+        useEffect(()=>{ sideeffects },[dependencies])
+        

@@ -20,9 +20,9 @@ function Taskmanager() {
         <div>
             <h1 className='text-7xl text-blue-400 mb-10 text-center'>Taskmanager</h1>
             <div className='flex justify-around'>
-                {/* <Addtask addNewTask={addNewTask} /> */}
-                {/* <Taskslist tasks={tasks} deleteTask={deleteTask} /> */}
-                {/* <Taskcount tasks={tasks} /> */}
+                <Addtask addNewTask={addNewTask} /> 
+                 <Taskslist tasks={tasks} deleteTask={deleteTask} /> 
+                 <Taskcount tasks={tasks} />
                 {/* <SideEffects/> */}
             </div>
         </div>

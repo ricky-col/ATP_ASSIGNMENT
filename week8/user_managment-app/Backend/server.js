@@ -11,7 +11,10 @@ const app = express()
 const port = process.env.PORT
 
 
-app.use(cors({"origin":"http://localhost:5180"}))
+app.use(cors({
+  origin: ["http://localhost:5180", "https://atp-assignment-1.onrender.com"],
+  credentials: true
+}))
 // use body-parser middleware
 app.use(express.json())
 // use cookie-parser middleware

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router'
+import API_URL from '../apiConfig'
 
 function Adduser() {
   const { register, handleSubmit, formState: { errors } } = useForm()
@@ -13,7 +14,7 @@ function Adduser() {
       setLoading(true)
       setError(null)
 
-      const res = await fetch("http://localhost:4000/user-api/user", {
+      const res = await fetch(`${API_URL}/user-api/user`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"

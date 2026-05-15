@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
+import API_URL from '../apiConfig'
 
 function Userlist() {
   const [users, setUsers] = useState([])
@@ -11,7 +12,7 @@ function Userlist() {
     async function getUsers() {
       try {
         setLoading(true)
-        const res = await fetch('http://localhost:4000/user-api/users')
+        const res = await fetch(`${API_URL}/user-api/users`)
         const data = await res.json()
         setUsers(data.payload || [])
       } catch (err) {

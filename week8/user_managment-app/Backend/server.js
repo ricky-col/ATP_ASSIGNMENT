@@ -33,6 +33,10 @@ const connectDb = async () => {
 
 connectDb();
 
+app.get("/", (req, res) => {
+  res.json({ message: "Backend is running!" });
+});
+
 //calling user api
 app.use("/user-api", userApp);
 //error handling middleware

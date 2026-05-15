@@ -4,20 +4,58 @@ import {verifyToken} from "../middlewares/verifyToken.js"
 import { ArticleModel } from "../models/articleModel.js"
 import { UserTypeModel } from "../models/userModel.js"
 import { checkAuthor } from "../middlewares/checkauthor.js"
+import upload from "../config/multer.js"
+import { uploadToCloudinary } from "../config/cloudinaryUpload.js";
+import cloudinary from "../config/cloudinary.js"
+import mongoose from "mongoose";
+
 
 
 export const userRoute=exp.Router()
 
 //create or register user
-userRoute.post('/users',async(req,res)=>{
-    //get user obj from req
-    let userObj = req.body;
-    //call register
-    const newUserObj = await register({...userObj , role: "USER"})
-    //respose
-    res.status(201).json({message:"user created successfully",user:newUserObj})
+userRoute.post(
+        "/users",
+        upload.single("profileImageUrl"),
+        async (req, res, next) => {
+        console.log("POST /user-api/users hit");
+        let cloudinaryResult;
 
-})
+            try {
+                let userObj = req.body;
+
+                //  Step 1: upload image to cloudinary from memoryStorage (if exists)
+                if (req.file) {
+                cloudinaryResult = await uploadToCloudinary(req.file.buffer);
+                }
+
+                // Step 2: call existing register()
+                const newUserObj = await register({
+                ...userObj,
+                role: userObj.role || "USER",
+                profileImageUrl: cloudinaryResult?.secure_url,
+                });
+
+                res.status(201).json({
+                message: "user created",
+                payload: newUserObj,
+                database: mongoose.connection.name
+                });
+
+            } catch (err) {
+
+                // Step 3: rollback 
+                if (cloudinaryResult?.public_id) {
+                await cloudinary.uploader.destroy(cloudinaryResult.public_id);
+                }
+
+                next(err); // send to your error middleware
+            }
+
+        }
+        );
+
+
 //read all articles(protected route)
 userRoute.get('/articles',verifyToken("USER"),async(req,res)=>{
     //read the articles by this author which are active
@@ -77,3 +115,7 @@ userRoute.put('/articles',verifyToken("USER"),async(req,res)=>{
       }
      return res.status(200).json({message:"commented",payload:updatedArticle})
 })
+
+
+
+

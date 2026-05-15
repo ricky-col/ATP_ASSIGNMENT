@@ -14,7 +14,26 @@ config()
 const app = exp();
 
 //use cors middle ware
-app.use(cors({ origin:["http://localhost:5173"],credentials:true}));
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:5174",
+  process.env.FRONTEND_URL,
+  process.env.FRONTEND_URL?.replace(/\/$/, "") // Add version without trailing slash
+].filter(Boolean);
+
+app.use(cors({
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      console.log("CORS blocked for origin:", origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true
+}));
 //add body parseer middleware
 app.use(exp.json())
 //cookie parser
@@ -33,6 +52,7 @@ app.use('/common-api',commonRoute)
 const connectdb = async()=>{
 {
     try{
+    console.log("Attempting database connection to DB_URL:", process.env.DB_URL);
     await connect(process.env.DB_URL)
     console.log("connected to database successfully")
     //create http server
@@ -51,58 +71,56 @@ app.use((req,res,next)=>{
 })
 
 
-//error handling middleware
-app.use((err,req,res,next)=>{
-    console.log("error found",err)
-    res.json({message:"error",reason:err.message})
-})
-
+// Comprehensive error handling middleware
 app.use((err, req, res, next) => {
+  console.log("Error details:", {
+    name: err.name,
+    message: err.message,
+    status: err.status,
+    code: err.code
+  });
 
-  console.log("Error name:", err.name);
-  console.log("Error code:", err.code);
-  console.log("Full error:", err);
-
-  // mongoose validation error
+  // Mongoose validation error
   if (err.name === "ValidationError") {
     return res.status(400).json({
       message: "error occurred",
-      error: err.message,
+      reason: err.message,
     });
   }
 
-  // mongoose cast error
+  // Mongoose cast error (invalid IDs)
   if (err.name === "CastError") {
     return res.status(400).json({
       message: "error occurred",
-      error: err.message,
+      reason: "Invalid ID format",
     });
   }
 
+  // Handle duplicate key errors (code 11000)
   const errCode = err.code ?? err.cause?.code ?? err.errorResponse?.code;
-  const keyValue = err.keyValue ?? err.cause?.keyValue ?? err.errorResponse?.keyValue;
-
   if (errCode === 11000) {
-    const field = Object.keys(keyValue)[0];
-    const value = keyValue[field];
+    const keyValue = err.keyValue ?? err.cause?.keyValue ?? err.errorResponse?.keyValue;
+    const field = keyValue ? Object.keys(keyValue)[0] : "field";
+    const value = keyValue ? keyValue[field] : "unknown";
 
     return res.status(409).json({
       message: "error occurred",
-      error: `${field} "${value}" already exists`,
+      reason: `${field} "${value}" already exists`,
     });
   }
 
-  // custom errors
+  // Custom errors with status
   if (err.status) {
     return res.status(err.status).json({
-      message: "error occurred",
-      error: err.message,
+      message: "error",
+      reason: err.message,
     });
   }
 
-  // default server error
+  // Default server error
   res.status(500).json({
     message: "error occurred",
-    error: "Server side error",
+    reason: "Internal Server Error",
+    details: err.message
   });
 });

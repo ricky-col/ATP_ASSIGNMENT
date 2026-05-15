@@ -4,13 +4,11 @@ import { Outlet } from 'react-router'
 
 function Routelayout() {
   return (
-    <div>
+    <div className="flex flex-col min-h-screen bg-white">
         <Header/>
-
-        <div className='min-h-screen'>
-        <Outlet/>
-        </div>
-
+        <main className='flex-1'>
+          <Outlet/>
+        </main>
         <Footer/>
     </div>
   )

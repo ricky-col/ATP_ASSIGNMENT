@@ -5,19 +5,44 @@ import { authenticate } from "../Services/authServices.js"
 import { UserTypeModel } from "../models/userModel.js"
 import { checkAuthor } from "../middlewares/checkauthor.js"
 import { verifyToken } from "../middlewares/verifyToken.js"
+import mongoose from "mongoose";
+import upload from "../config/multer.js"
+import { uploadToCloudinary } from "../config/cloudinaryUpload.js";
+import cloudinary from "../config/cloudinary.js"
 
 export const authorRoute = exp.Router()
 
 //register author
-//create or register user (public)
-authorRoute.post('/users', async (req, res) => {
-    //get user obj from req
-    let authorObj = req.body;
-    //call register
-    const newAuthorObj = await register({ ...authorObj, role: "AUTHOR" })
-    //respose
-    res.status(201).json({ message: "author created successfully", user: newAuthorObj })
+authorRoute.post('/users', upload.single("profileImageUrl"), async (req, res, next) => {
+    console.log("POST /author-api/users hit");
+    let cloudinaryResult;
+    try {
+        let authorObj = req.body;
 
+        // Upload image to cloudinary if exists
+        if (req.file) {
+            cloudinaryResult = await uploadToCloudinary(req.file.buffer);
+        }
+
+        // call register
+        const newAuthorObj = await register({ 
+            ...authorObj, 
+            role: "AUTHOR",
+            profileImageUrl: cloudinaryResult?.secure_url
+        })
+
+        res.status(201).json({ 
+            message: "author created successfully", 
+            user: newAuthorObj,
+            database: mongoose.connection.name
+        })
+    } catch (err) {
+        // Rollback image if registration fails
+        if (cloudinaryResult?.public_id) {
+            await cloudinary.uploader.destroy(cloudinaryResult.public_id);
+        }
+        next(err);
+    }
 })
 
 
@@ -57,24 +82,30 @@ authorRoute.get('/articles/:authorId',verifyToken("AUTHOR"),async(req,res)=>{
 authorRoute.put('/articles',verifyToken("AUTHOR"),async(req,res)=>{
     //get the modified article
     let modifiedArticle = req.body;
-    //find article
-    let articleOfDb = await ArticleModel.findOne({_id:modifiedArticle.articleId,author:modifiedArticle.author})
-    if(!articleOfDb)
-    {
-        res.status(404).json({message:"article not found"})
+    
+    // Find article to verify ownership
+    let articleOfDb = await ArticleModel.findById(modifiedArticle._id);
+    
+    if(!articleOfDb) {
+        return res.status(404).json({message:"Article not found"});
     }
+
+    // Verify ownership
+    if (articleOfDb.author.toString() !== req.user.userId) {
+        return res.status(403).json({message: "Forbidden. You can only edit your own articles"});
+    }
+
     //update the article
-    let updatedArticle = await ArticleModel.findByIdAndUpdate(modifiedArticle.articleId,{ 
+    let updatedArticle = await ArticleModel.findByIdAndUpdate(modifiedArticle._id,{ 
         $set:{
             title:modifiedArticle.title,
             content:modifiedArticle.content,
             category:modifiedArticle.category
         }
-    },{new:true})
-    //send response updated article 
-    res.status(201).json({message:"updated article successfully",payload:updatedArticle})
+    },{new:true});
 
-
+    //send response
+    res.status(200).json({message:"Updated article successfully",payload:updatedArticle});
 })
 
 

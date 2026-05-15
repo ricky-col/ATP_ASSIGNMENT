@@ -1,13 +1,18 @@
 import { useState } from 'react'
 import RootLayout from './components/RootLayout'
-import { createBrowserRouter, RouterProvider } from 'react-router'
+import { createBrowserRouter, RouterProvider, Navigate } from 'react-router'
 import Register from './components/Register'
 import Login from './components/Login'
 import Home from './components/Home'
 import AdminDashboard from './components/AdminDashboard'
 import AuthorDashboard from './components/AuthorDashboard'
-import UserDashbord from "./components/UserDashboard"
+import UserProfile from "./components/UserProfile"
+import WriteArticle from './components/WriteArticle'
+import MyArticles from './components/MyArticles'
+import ArticleDetail from './components/ArticleDetail'
 import {Toaster} from "react-hot-toast"
+import ProtectedRoute from './components/ProtectedRoute'
+import Unauthorized from './components/Unauthorized'
 
 function App() {
 
@@ -27,19 +32,39 @@ function App() {
         {
           path: "register",
           element: <Register />
-        }]},
+        },
         {
           path: "admin-dashboard",
-          element: <AdminDashboard />
+          element: <ProtectedRoute><AdminDashboard /></ProtectedRoute>
         },
         {
           path: "author-profile",
-          element: <AuthorDashboard />
+          element: <ProtectedRoute allowedRoles={["AUTHOR"]}><AuthorDashboard /></ProtectedRoute>,
+          children: [
+            {
+              path: "add-article",
+              element: <WriteArticle />
+            },
+            {
+              path: "articles",
+              element: <MyArticles />
+            },
+            {
+              path: "",
+              element: <Navigate to="articles" replace />
+            }
+          ]
         },
         {
           path: "user-profile",
-          element: <UserDashbord />
+          element: <ProtectedRoute allowedRoles={["USER"]}><UserProfile /></ProtectedRoute>
+        },
+        {
+          path: "article/:id",
+          element: <ProtectedRoute><ArticleDetail /></ProtectedRoute>
         }
+      ]
+    }
   ])
 
   return (

@@ -18,16 +18,16 @@ function Login() {
       await login(userobj)
       toast.success("login successfully")
       
-      //console.log(isAuthenticated)
-      //console.log(currentUser)
+      
     }
 
  useEffect(()=>{
     if(isAuthenticated && currentUser){
-      if(currentUser.role==="USER"){
+      const role = currentUser.role?.toUpperCase();
+      if(role === "USER"){
         navigate("/user-profile",{state: currentUser})
       }
-      else if (currentUser.role==="AUTHOR"){
+      else if (role === "AUTHOR"){
         navigate("/author-profile",{state: currentUser})
       }
     }

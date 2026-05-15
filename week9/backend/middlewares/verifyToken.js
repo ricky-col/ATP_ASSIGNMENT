@@ -13,9 +13,12 @@ export const verifyToken= (...allowedRoles) => {
     }
     //verify the validatiy of the toke
     const decodedToken = jwt.verify(token,process.env.JWT_SECRET)
+    console.log("decodedToken:",decodedToken)
+    console.log("allowedRoles:",allowedRoles)
 
     //check if role is allowed
     if(!allowedRoles.includes(decodedToken.role)){
+        console.log("Role mismatch: ", decodedToken.role, " not in ", allowedRoles);
         return res.status(403).json({message:"forbidden. you dont have permission"})
     }
     //attach user info to req for use in routes
@@ -29,13 +32,15 @@ export const verifyToken= (...allowedRoles) => {
         if(err.name === "TokenExpiredError")
         {
             return res.status(401).json({message:"session expired please login"})
-
         }
         if(err.name === "JsonWebTokenError")
         {
             return res.status(401).json({message:"invalid token please login"})
-
         }
-        // next(err);
+        
+        // If it's some other error, send a generic 401 or call next(err)
+        // For security, a 401 is usually safer than 500 for auth issues
+        console.error("Token verification error:", err);
+        return res.status(401).json({message:"Authentication failed", error: err.message});
     }
 }}
